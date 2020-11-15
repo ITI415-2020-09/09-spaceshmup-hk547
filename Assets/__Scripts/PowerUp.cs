@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour {
 
+    public float speed = 10f;
+    private Vector3 p0, p1; // The two points to interpolate
+    private float timeStart; // Birth time for this
+    private float duration = 4; // Duration of movement
+
     [Header("Set in Inspector")]
     // This is an unusual but handy use of Vector2s. x holds a min value
     // and y a max value for a Random.Range() that will be called later
     public Vector2 rotMinMax = new Vector2(15, 90);
     public Vector2 driftMinMax = new Vector2(.25f, 2);
-    public float lifeTime = 6f; // Seconds the PowerUp exists
-    public float fadeTime = 4f; // Seconds it will then fade
+    public float lifeTime = 8f; // Seconds the PowerUp exists
+    public float fadeTime = 6f; // Seconds it will then fade
 
     [Header("Set Dynamically")]
     public WeaponType type; // The type of the PowerUp 
@@ -54,8 +59,41 @@ public class PowerUp : MonoBehaviour {
         birthTime = Time.time;
     }
 
+    private void Start()
+    {
+        p0 = p1 = pos;
+
+        InitMovement();
+    }
+
+    void InitMovement()
+    {
+        p0 = p1; // Set p0 to the old p1
+        // Assign a new on-screen location to p1
+        float widMinRad = bndCheck.camWidth - bndCheck.radius;
+        float hgtMinRad = bndCheck.camHeight - bndCheck.radius;
+        p1.x = Random.Range(-widMinRad, widMinRad);
+        p1.y = Random.Range(-hgtMinRad, hgtMinRad);
+
+        // Reset the time
+        timeStart = Time.time;
+    }
+    public Vector3 pos
+    {
+        get
+        {
+            return (this.transform.position);
+        }
+        set
+        {
+            this.transform.position = value;
+        }
+    }
+
     private void Update()
     {
+        Move();
+
         cube.transform.rotation = Quaternion.Euler(rotPerSecond * Time.time);
 
         // Fade out the PowerUp over time
@@ -89,6 +127,20 @@ public class PowerUp : MonoBehaviour {
             // If the PowerUp has drifted entirely off screen, destroy it
             Destroy(gameObject);
         }
+    }
+
+    public virtual void Move()
+    {
+        float u = (Time.time - timeStart) / duration;
+
+        if (u >= 1)
+        {
+            InitMovement();
+            u = 0;
+        }
+
+        u = 1 - Mathf.Pow(1 - u, 2); // Apply Ease Out easing to u
+        pos = ((1 - u) * p0) + (u * p1);// Simple linear interpolation
     }
 
     public void SetType(WeaponType wt)

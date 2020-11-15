@@ -21,6 +21,14 @@ public class Enemy : MonoBehaviour {
 
     protected BoundsCheck bndCheck;
 
+    public GameObject projectileEnemyPrefab;
+    public float projectileSpeed = 50;
+    private float TimeLeft = 2.0f;
+    private float nextTime = 0.0f;
+
+    
+
+
     private void Awake()
     {
         bndCheck = GetComponent<BoundsCheck>();
@@ -46,11 +54,19 @@ public class Enemy : MonoBehaviour {
         }
     }
 
+    
+
     void Update()
     {
         Move();
 
-        if(showingDamage && Time.time > damageDoneTime)
+        if (Time.time > nextTime)
+        {
+            nextTime = Time.time + TimeLeft;
+            TempFire();
+        }
+
+            if (showingDamage && Time.time > damageDoneTime)
         {
             UnShowDamage();
         }
@@ -61,6 +77,17 @@ public class Enemy : MonoBehaviour {
             Destroy(gameObject);
         }
     }
+
+
+
+    void TempFire()
+    { 
+        GameObject projGO = Instantiate<GameObject>(projectileEnemyPrefab);
+        projGO.transform.position = transform.position;
+        Rigidbody rigidB = projGO.GetComponent<Rigidbody>();
+        rigidB.velocity = Vector3.down * projectileSpeed;
+    }
+
 
     public virtual void Move()
     {
@@ -125,4 +152,5 @@ public class Enemy : MonoBehaviour {
         }
         showingDamage = false;
     }
+
 }

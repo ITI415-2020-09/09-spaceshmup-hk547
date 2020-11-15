@@ -28,13 +28,13 @@ public class WeaponDefinition
 {
     public WeaponType type = WeaponType.none;
     public string letter; // Letter to show on the power-up
-    public Color color = Color.white; // Color of Collar & power-up
+    public Color color = Color.yellow; // Color of Collar & power-up
     public GameObject projectilePrefab; // Prefab for projectiles
-    public Color projectileColor = Color.white;
-    public float damageOnHit = 0; // Amount of damage caused
+    public Color projectileColor = Color.yellow;
+    public float damageOnHit = 4; // Amount of damage caused
     public float continuousDamage = 0; // Damage per second (Laser)
     public float delayBetweenShots = 0;
-    public float velocity = 20; // Speed of projectiles
+    public float velocity = 50; // Speed of projectiles
 }
 public class Weapon : MonoBehaviour {
     static public Transform PROJECTILE_ANCHOR;
@@ -122,6 +122,23 @@ public class Weapon : MonoBehaviour {
                 break;
 
             case WeaponType.spread:
+                p = MakeProjectile(); // Make middle Projectile
+                p.rigid.velocity = vel;
+                p = MakeProjectile(); // Make right Projectile
+                p.transform.rotation = Quaternion.AngleAxis(10, Vector3.back);
+                p.rigid.velocity = p.transform.rotation * vel;
+                p = MakeProjectile(); // Make left Projectile
+                p.transform.rotation = Quaternion.AngleAxis(-10, Vector3.back);
+                p.rigid.velocity = p.transform.rotation * vel;
+                p = MakeProjectile(); // Make twice right Projectile
+                p.transform.rotation = Quaternion.AngleAxis(20, Vector3.back);
+                p.rigid.velocity = p.transform.rotation * vel;
+                p = MakeProjectile(); // Make twice left Projectile
+                p.transform.rotation = Quaternion.AngleAxis(-20, Vector3.back);
+                p.rigid.velocity = p.transform.rotation * vel;
+                break;
+
+            case WeaponType.laser:
                 p = MakeProjectile(); // Make middle Projectile
                 p.rigid.velocity = vel;
                 p = MakeProjectile(); // Make right Projectile

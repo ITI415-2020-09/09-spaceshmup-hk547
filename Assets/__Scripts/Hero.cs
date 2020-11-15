@@ -1,19 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class Hero : MonoBehaviour {
     static public Hero S; // Singleton
 
     [Header("Set in Inspector")]
     // These fields control the movement of the ship
-    public float speed = 30;
-    public float rollMult = -45;
+    public float speed = 50;
+    public float rollMult = -30;
     public float pitchMult = 30;
     public float gameRestartDelay = 2f;
     public GameObject projectilePrefab;
     public float projectileSpeed = 40;
     public Weapon[] weapons;
+
+    public AudioSource audioS;
+    public AudioClip upgradeSound;
+    public AudioClip shieldHitSound;
+    public AudioClip boomSound;
+ 
 
     [Header("Set Dynamically")]
     [SerializeField]
@@ -65,6 +72,7 @@ public class Hero : MonoBehaviour {
         // Then ensure that fireDelegate isn't null to avoid an error
         if (Input.GetAxis("Jump") == 1 && fireDelegate != null)
         {
+
             fireDelegate();
         }
     }
@@ -82,14 +90,22 @@ public class Hero : MonoBehaviour {
         }
         lastTriggerGo = go;
 
-        if(go.tag == "Enemy")
+        if (go.tag == "Enemy")
         {
+            audioS.PlayOneShot(shieldHitSound);
+            shieldLevel--;
+            Destroy(go);
+        }
+        else if (go.tag == "ProjectileEnemy")
+        {
+            audioS.PlayOneShot(shieldHitSound);
             shieldLevel--;
             Destroy(go);
         }
         else if (go.tag == "PowerUp")
         {
             // If the shield was triggered by a PowerUp
+            audioS.PlayOneShot(upgradeSound);
             AbsorbPowerUp(go);
         }
         else
@@ -140,6 +156,7 @@ public class Hero : MonoBehaviour {
             // If the shield is going to be set to less than zero
             if (value < 0)
             {
+                audioS.PlayOneShot(boomSound);
                 Destroy(this.gameObject);
                 // Tell Main.S to restart the game after a delay
                 Main.S.DelayedRestart(gameRestartDelay);
